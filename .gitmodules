@@ -1,0 +1,39 @@
+[submodule "Certify"]
+	path = Certify
+	url = https://github.com/GhostPack/Certify
+[submodule "ForgeCert"]
+	path = ForgeCert
+	url = https://github.com/GhostPack/ForgeCert
+[submodule "KeeThief"]
+	path = KeeThief
+	url = https://github.com/GhostPack/KeeThief
+[submodule "Koh"]
+	path = Koh
+	url = https://github.com/GhostPack/Koh
+[submodule "Lockless"]
+	path = Lockless
+	url = https://github.com/GhostPack/Lockless
+[submodule "RestrictedAdmin"]
+	path = RestrictedAdmin
+	url = https://github.com/GhostPack/RestrictedAdmin
+[submodule "Rubeus"]
+	path = Rubeus
+	url = https://github.com/GhostPack/Rubeus
+[submodule "SafetyKatz"]
+	path = SafetyKatz
+	url = https://github.com/GhostPack/SafetyKatz
+[submodule "Seatbelt"]
+	path = Seatbelt
+	url = https://github.com/GhostPack/Seatbelt
+[submodule "SharpDPAPI"]
+	path = SharpDPAPI
+	url = https://github.com/GhostPack/SharpDPAPI
+[submodule "SharpDump"]
+	path = SharpDump
+	url = https://github.com/GhostPack/SharpDump
+[submodule "SharpUp"]
+	path = SharpUp
+	url = https://github.com/GhostPack/SharpUp
+[submodule "SharpWMI"]
+	path = SharpWMI
+	url = https://github.com/GhostPack/SharpWMI
