@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 0 * * 0'
   workflow_dispatch:
+    inputs:
+      publish:
+        description: Skip version check and publish release
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build:
@@ -25,17 +31,19 @@ jobs:
 
     - name: Checkout all submodules
       id: update_sync
+      shell: bash
       run: |
         git submodule update --init --recursive --remote --merge
         if [ -n "$(git status --porcelain --ignore-submodules=dirty)" ]; then
           echo "changed=true" >> $GITHUB_OUTPUT
         else
           echo "changed=false" >> $GITHUB_OUTPUT
+          echo "No changes detected."
         fi
-      shell: bash
 
     - name: Push Updated History
-      if: steps.update_sync.outputs.changed == 'true'
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
+      shell: bash
       run: |
         UPDATED_MODULES=$(git diff --name-only --diff-filter=M)
         git add .
@@ -44,18 +52,18 @@ jobs:
         
     - name: Patch .NET Target Version
       run: find . -name "*.csproj" -exec sed -iE 's/<TargetFrameworkVersion>v4.0<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
-      if: steps.update_sync.outputs.changed == 'true'
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
       shell: bash
 
-    - name: Patch .csproj to add obfuscar phase
+    - name: Enable Obfuscar
       run:
-        find . -name "*.csproj" -exec sed -iE 's/<\/Project>//' {} + -exec sed -iE '$r obfuscar-template.patch' {} + -exec sed -iE '$<\/Project>' {} +
-      if: steps.update_sync.outputs.changed == 'true'
+        find . -name "*.csproj" -exec sed -i 's|</Project>||' {} + -exec sed -i '$r obfuscar-template.patch' {} + -exec sed -i '$a </Project>' {} +
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
       shell: bash
 
     - name: Install DNF 4.8 packs
       shell: pwsh
-      if: steps.rebase_sync.outputs.changed == 'true'
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
       working-directory: "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer"
       run: |
         $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
@@ -65,29 +73,45 @@ jobs:
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1.1
-      if: steps.update_sync.outputs.changed == 'true'
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
       
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.6
-      if: steps.update_sync.outputs.changed == 'true'
+      uses: NuGet/setup-nuget@v2
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
 
     - name: Build Solution
-      if: steps.update_sync.outputs.changed == 'true'
-      run:
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
+      shell: bash
+      run: |
         PWDROOT=$(pwd -P)
+        mkdir -p ./Artifacts
         for pkg in Certify ForgeCert KeeThief/DecryptionShellcode KeeThief/KeeTheft KeeThief/KeePass-2.34-Source-Patched Koh Lockless RestrictedAdmin Rubeus SafetyKatz Seatbelt SharpDPAPI SharpDump SharpUp SharpWMI
         do
           cd $pkg
-          nuget restore ${pkg}.sln
-          dotnet tool install -g obfuscar.console
-          msbuild.exe ${pkg}.sln /p:Configuration=Release /p:Platform="Any CPU" /p:DebugType=None
+
+          # We assume every pkg has only one sln file.
+          # This may fail builds in the future.
+          nuget restore *.sln
+          msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
+
           cd $PWDROOT
-          cp "${pkg}/bin/Release/*.exe" .
+
+          for file in ${pkg}/bin/Release/*.exe
+          do
+              cp "$file" "./Artifacts/${file%.exe}-NoObfs.exe"
+            cp "./Obfuscator_Output/$file" "./Artifacts/${file%.exe}.exe"
+          done
+
+          for file in ${pkg}/bin/Release/*.dll
+          do
+            cp "$file" "./Artifacts/${file%.dll}-NoObfs.dll"
+            cp "./Obfuscator_Output/$file" "./Artifacts/${file%.dll}.dll"
+          done
         done
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
-      if: steps.update_sync.outputs.changed == 'true'
+      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
       with:
         tag_name: build-${{ steps.date.outputs.date }}
         name: Build ${{ steps.date.outputs.date }}
@@ -95,6 +119,6 @@ jobs:
           Automated build from StarfireLab/SharpWeb fork.
           Build Date: ${{ steps.date.outputs.date }}
         files: |
-          ./*.exe
+          ./Artifacts/*.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
