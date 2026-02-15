@@ -92,6 +92,7 @@ jobs:
 
           cd ${pkg}/bin/Release
           
+          shopt -s nullglob
           for file in *.exe
           do
             cp "$file" "${PWDROOT}/Artifacts/${file%.exe}-NoObfs.exe"
@@ -106,6 +107,7 @@ jobs:
           do
             cp $file "${PWDROOT}/Artifacts/"
           done
+          shopt -u nullglob
           
           cd $PWDROOT
         done
