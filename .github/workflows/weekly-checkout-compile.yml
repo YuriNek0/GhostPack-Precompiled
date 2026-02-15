@@ -90,11 +90,12 @@ jobs:
           msbuild.exe -t:restore -p:Configuration=Release
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
 
+          find . # Debug msg
           cd ${pkg}/bin/Release
           
           for file in *.exe
           do
-              cp "$file" "./Artifacts/${file%.exe}-NoObfs.exe"
+            cp "$file" "./Artifacts/${file%.exe}-NoObfs.exe"
             cp "./Obfuscator_Output/$file" "./Artifacts/${file%.exe}.exe"
           done
 
