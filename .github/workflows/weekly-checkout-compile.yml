@@ -84,13 +84,11 @@ jobs:
           cd $pkg
 
           msbuild.exe -t:restore -p:Configuration=Release -p:RestorePackagesConfig=true
-          find . -name "*.csproj" -exec sed -iE 's/<TargetFrameworkVersion>v4.0<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
+          find . -name "*.csproj" -exec sed -i 's/<TargetFrameworkVersion>v4.0<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
           find . -name "*.csproj" -exec sed -i 's|</Project>||' {} + -exec sed -i '$r ../obfuscar-template.patch' {} + -exec sed -i '$a </Project>' {} +
           
           nuget restore *.sln
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
-
-          find ${PWDROOT}/$pkg # debug msg
 
           cd ${pkg}/bin/Release
           
@@ -103,8 +101,11 @@ jobs:
           do
             cp "$file" "${PWDROOT}/Artifacts/${file%.dll}-NoObfs.dll"
           done
-          
-          cp "./Obfuscator_Output/*" "${PWDROOT}/Artifacts/"
+
+          for file in ./Obfuscator_Output/*
+          do
+            cp $file "${PWDROOT}/Artifacts/"
+          done
           
           cd $PWDROOT
         done
