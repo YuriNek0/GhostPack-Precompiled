@@ -98,7 +98,7 @@ jobs:
             cp "./Obfuscator_Output/$file" "./Artifacts/${file%.exe}.exe"
           done
 
-          for file *.dll
+          for file in *.dll
           do
             cp "$file" "./Artifacts/${file%.dll}-NoObfs.dll"
             cp "./Obfuscator_Output/$file" "./Artifacts/${file%.dll}.dll"
