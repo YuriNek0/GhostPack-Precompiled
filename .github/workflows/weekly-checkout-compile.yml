@@ -84,7 +84,7 @@ jobs:
           cd $pkg
 
           msbuild.exe -t:restore -p:Configuration=Release -p:RestorePackagesConfig=true
-          find . -name "*.csproj" -exec sed -i 's/<TargetFrameworkVersion>v4.[0-9]+<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
+          find . -name "*.csproj" -exec sed -i 's/<TargetFrameworkVersion>v.*<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
           find . -name "*.csproj" -exec sed -i 's|</Project>||' {} + -exec sed -i '$r ../obfuscar-template.patch' {} + -exec sed -i '$a </Project>' {} +
           
           nuget restore *.sln
