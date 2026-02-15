@@ -46,7 +46,7 @@ jobs:
         fi
 
     - name: Push Updated History
-      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
+      if: ${{ steps.update_sync.outputs.changed == 'true' }}
       shell: bash
       run: |
         UPDATED_FILES=$(git diff --name-only --diff-filter=M | sed 's/^/- /')
