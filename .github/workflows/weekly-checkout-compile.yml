@@ -94,14 +94,14 @@ jobs:
           
           for file in *.exe
           do
-            cp "$file" "./Artifacts/${file%.exe}-NoObfs.exe"
-            cp "./Obfuscator_Output/$file" "./Artifacts/${file%.exe}.exe"
+            cp "$file" "${PWDROOT}/Artifacts/${file%.exe}-NoObfs.exe"
+            cp "./Obfuscator_Output/$file" "${PWDROOT}/Artifacts/${file%.exe}.exe"
           done
 
           for file in *.dll
           do
-            cp "$file" "./Artifacts/${file%.dll}-NoObfs.dll"
-            cp "./Obfuscator_Output/$file" "./Artifacts/${file%.dll}.dll"
+            cp "$file" "${PWDROOT}/Artifacts/${file%.dll}-NoObfs.dll"
+            cp "./Obfuscator_Output/$file" "${PWDROOT}/Artifacts/${file%.dll}.dll"
           done
           
           cd $PWDROOT
