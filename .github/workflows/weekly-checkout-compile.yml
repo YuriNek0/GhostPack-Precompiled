@@ -90,7 +90,7 @@ jobs:
           nuget restore *.sln
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
 
-          find ${PWDROOT} # debug msg
+          find ${PWDROOT}/$pkg # debug msg
 
           cd ${pkg}/bin/Release
           
