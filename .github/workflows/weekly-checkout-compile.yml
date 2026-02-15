@@ -54,17 +54,6 @@ jobs:
         git add .
         git commit -m "$COMMIT_MSG"
         git push origin main
-        
-    - name: Patch .NET Target Version
-      run: find . -name "*.csproj" -exec sed -iE 's/<TargetFrameworkVersion>v4.0<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
-      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
-      shell: bash
-
-    - name: Enable Obfuscar
-      run:
-        find . -name "*.csproj" -exec sed -i 's|</Project>||' {} + -exec sed -i '$r obfuscar-template.patch' {} + -exec sed -i '$a </Project>' {} +
-      if: ${{ steps.update_sync.outputs.changed == 'true' || github.event.inputs.publish == 'true' }}
-      shell: bash
 
     - name: Install DNF 4.8 packs
       shell: pwsh
@@ -95,6 +84,10 @@ jobs:
           cd $pkg
 
           msbuild.exe -t:restore -p:Configuration=Release -p:RestorePackagesConfig=true
+          find . -name "*.csproj" -exec sed -iE 's/<TargetFrameworkVersion>v4.0<\/TargetFrameworkVersion>/<TargetFrameworkVersion>v4.8<\/TargetFrameworkVersion>/' {} +
+          find . -name "*.csproj" -exec sed -i 's|</Project>||' {} + -exec sed -i '$r obfuscar-template.patch' {} + -exec sed -i '$a </Project>' {} +
+          
+          msbuild.exe -t:restore -p:Configuration=Release
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
 
           cd $PWDROOT
