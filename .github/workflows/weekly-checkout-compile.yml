@@ -94,9 +94,7 @@ jobs:
         do
           cd $pkg
 
-          # We assume every pkg has only one sln file.
-          # This may fail builds in the future.
-          nuget restore *.sln
+          msbuild -t:restore
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
 
           cd $PWDROOT
