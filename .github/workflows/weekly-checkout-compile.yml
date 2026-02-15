@@ -94,7 +94,7 @@ jobs:
         do
           cd $pkg
 
-          msbuild -t:restore
+          msbuild.exe -t:restore
           msbuild.exe *.sln -p:Configuration=Release -p:Platform="Any CPU" -p:DebugType=None -p:DebugSymbols=false
 
           cd $PWDROOT
